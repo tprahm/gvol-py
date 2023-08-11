@@ -1407,3 +1407,270 @@ query HistoricalNetPositioningApi($symbol: SymbolEnumType, $dateStart: String, $
 {HistoricalNetPositioningApi(symbol: $symbol, dateStart: $dateStart, dateEnd: $dateEnd exchange: $exchange) 
 {date strike netInv indexPrice } }
 """
+
+options_butterfly_index_hist = """
+query ButterflyIndex($symbol: SymbolEnumType, $exchange: ExchangeEnumType, $dateStart: String, $dateEnd: String) {
+  genericButterflyIndex(symbol: $symbol, exchange: $exchange, dateStart: $dateStart, dateEnd: $dateEnd) {
+    date
+    butterflySpreadRatio
+    butterflyIndexRatio
+  }
+}
+"""
+
+options_rv_parksinson_hist = """
+query currentOrderbookPricing($symbol: String, $dateStart: String, $dateEnd: String, $parkinsonRange: Float){
+ RvParkinson(symbol: $symbol, dateStart: $dateStart, dateEnd: $dateEnd, parkinsonRange: $parkinsonRange){
+    date
+    parkinsonHV
+  }
+}
+"""
+
+dvol_variance_premium_query = """
+query DVolVariancePremium($symbol: SymbolEnumType) {
+  dvolVariancePremium(symbol: $symbol) {
+    dvolImpliedRvDate
+    instrument
+    dvolOpen30Days
+    parkinsonHv
+    variancePremium
+  }
+}
+"""
+
+iv_rv_comparison_query = """
+query IvRvComparison($symbol: SymbolEnumType, $exchange: ExchangeEnumType, $dateStart: String, $dateEnd: String) {
+  IvRvComparison(symbol: $symbol, exchange: $exchange, dateStart: $dateStart, dateEnd: $dateEnd) {
+    date
+    parkinsonRvIndex
+    atm7
+    atm30
+    atm60
+    atm90
+    atm180
+  }
+}
+"""
+
+zscore_dvol_query = """
+query ZScoreDvol($symbol: SymbolEnumType, $exchange: ExchangeEnumType, $dateStart: String, $dateEnd: String) {
+  ZScoreDvol(symbol: $symbol, exchange: $exchange, dateStart: $dateStart, dateEnd: $dateEnd) {
+    date
+    currency
+    ln
+    clse
+    zScore
+    dvol
+  }
+}
+"""
+
+cash_secured_put_yield = """
+query cashSecuredPuts($symbol: SymbolEnumType, $exchange: ExchangeEnumType) {
+  genericCashSecuredPuts(symbol: $symbol, exchange: $exchange) {
+    date
+    instrumentName
+    expiration
+    strike
+    putCall
+    bidUsd
+    markUsd
+    askUsd
+    absoluteBidYieldNet
+    absoluteMarkYieldNet
+    absoluteAskYieldNet
+    bidYieldNetAnnual
+    markYieldNetAnnual
+    askYieldNetAnnual
+  }
+}
+"""
+
+covered_call_yield = """
+query coveredCall($symbol: SymbolEnumType, $exchange: ExchangeEnumType) {
+  genericCoveredCall(exchange: $exchange, symbol: $symbol) {
+    date
+    instrumentName
+    expiration
+    strike
+    putCall
+    bidUsd
+    markUsd
+    askUsd
+    calledOutAnnualized
+    calledOutAbsolute
+    absoluteBidYieldNet
+    absoluteMarkYieldNet
+    absoluteAskYieldNet
+    annualBidYieldNet
+    annualAskYieldNet
+    annualMarkYieldNet
+    absoluteMarkYieldCalledOut
+    absoluteAskYieldCalledOut
+    absoluteBidYieldCalledOut
+    annualizedBidYieldCalledOut
+    annualizedMarkYieldCalledOut
+    annualizedAskYieldCalledOut
+  }
+}
+"""
+
+straddle_yield = """
+query straddleRun($symbol: SymbolEnumType, $exchange: ExchangeEnumType) {
+  genericStraddleRun(symbol: $symbol, exchange: $exchange) {
+    expiration
+    strike
+    bidUsd
+    markUsd
+    askUsd
+    bidSpotPercentage
+    markSpotPercentage
+    askSpotPercentage
+    theta
+    vega
+    underlyingPrice
+  }
+}
+"""
+
+dVol_vol_of_vol = """
+query dVolVolOfVol($symbol: SymbolEnumType, $days: DaysBackEnumType) {
+  dvolVolOfVolData(symbol: $symbol, days: $days) {
+    date
+    volOfVol
+    open
+    high
+    low
+    close
+  }
+}
+"""
+
+dVol = """
+query dVol(
+    $exchange: ExchangeEnumType
+    $symbol: SymbolEnumType
+    $interval: String
+    $dateStart: String
+    $dateEnd: String
+) {
+    dVol: genericDvol(
+        symbol: $symbol
+        exchange: $exchange
+        interval: $interval
+        dateStart: $dateStart
+        dateEnd: $dateEnd
+    ) {
+        timerange
+        instrument
+        open
+        high
+        low
+        close
+    }
+}
+"""
+
+RealizedVolVolatilityCones_query = """
+query RealizedVolVolatilityConesQuery($symbol: SymbolEnumType, $date1: String, $date2: String) {
+    RealizedVolVolatilityCones(symbol: $symbol, beginDate: $date1, endDate: $date2) {
+        max365
+        current365
+        min365
+        p75365
+        p50365
+        p25365
+        max180
+        current180
+        min180
+        p75180
+        p50180
+        p25180
+        max90
+        current90
+        min90
+        p7590
+        p5090
+        p2590
+        max30
+        current30
+        min30
+        p7530
+        p5030
+        p2530
+        max14
+        current14
+        min14
+        p7514
+        p5014
+        p2514
+        max7
+        current7
+        min7
+        p757
+        p507
+        p257
+        max0
+        current0
+        min0
+        p750
+        p500
+        p250
+    }
+}
+"""
+
+RealizedVolCorr_query = """
+query RealizedVolCorr($symbol: SymbolEnumType, $dateStart: String, $dateEnd: String) {
+  RealizedVolCorr(symbol: $symbol, dateStart: $dateStart, dateEnd: $dateEnd) {
+    date
+    currency
+    corr10Btc
+    corr30Btc
+    corr90Btc
+    corr10Eth
+    corr30Eth
+    corr90Eth
+  }
+}
+"""
+
+RealizedVolBeta_query = """
+query RealizedVolBeta($symbol: SymbolEnumType, $dateStart: String, $dateEnd: String){
+  RealizedVolBeta(symbol: $symbol, dateStart: $dateStart, dateEnd: $dateEnd) {
+    date
+    currency
+    beta10Btc
+    beta30Btc
+    beta90Btc
+    beta10Eth
+    beta30Eth
+    beta90Eth
+  } 
+}
+"""
+
+RealizedVolParkinsonVsC2c_query = """
+query RealizedVolParkinsonVsC2c($symbol: SymbolEnumType, $dateStart: String, $dateEnd: String) {
+  RealizedVolParkinsonVsC2c(symbol: $symbol, dateStart: $dateStart, dateEnd: $dateEnd) {
+    date
+    currency
+    c2c_5
+    c2c_7
+    c2c_10
+    c2c_14
+    c2c_30
+    c2c_60
+    c2c_90
+    c2c_180
+    hv5
+    hv7
+    hv14
+    hv30
+    hv60
+    hv90
+    hv180
+  }
+}
+"""

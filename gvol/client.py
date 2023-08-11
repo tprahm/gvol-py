@@ -1621,3 +1621,549 @@ class GVol:
             gql(queries.options_cumulative_net_positioning_hist),
             variable_values={"symbol":symbol, "exchange":exchange, "dateStart":dateStart, "dateEnd":dateEnd}    
         )  
+
+    def options_butterfly_index_hist(
+        self,  symbol: types.BTCOrETHEnumType, exchange: types.ExchangeDeribit, dateStart: types.String, dateEnd: types.String
+    ) -> Dict:
+        """
+        Exchange: Deribit Only
+
+        Parameter: BTC/ETH, Date Range.
+
+        Available date range: May, 2021 to present day.
+
+        This endpoint depicts the relation between the Dvol Index (calculated by Deribit) and the constant 30 days ATM volatility. The relation is expressed by ratio or spread.
+
+        It is called butterfly index because this calculation mimics the information you could have analyzing butterflies. In fact the Dvol Index is calculated using all the strikes across the theoretical skew 30 days, and comparing them to the ATM 30 days constant will help trader's evaluate the richness of the "wings".
+        
+        Args:
+        {
+            "symbol": "BTC",
+            "exchange": "deribit",
+            "dateStart": "2023-01-01",
+            "dateEnd": "2023-06-01"
+        }
+
+        Returns:
+        {
+            "date": "1685577600000",
+            "butterflySpreadRatio": 5.04,
+            "butterflyIndexRatio": 1.13
+        }
+        """
+        return self._client.execute(
+            gql(queries.options_butterfly_index_hist),
+            variable_values={"symbol": symbol, "exchange": exchange, "dateStart": dateStart, "dateEnd": dateEnd}    
+        )  
+    
+    def options_rv_parksinson_hist(
+        self,
+        symbol: types.String,
+        dateStart: types.String,
+        dateEnd: types.String,
+        parkinsonRange: types.Float
+    ) -> Dict:
+        """
+        This endpoint retrieves the Parkinson realized volatility for the given symbol and date range, computed based on the specified day range.
+
+        The Parkinson realized volatility measures the price variability using the high and low prices of an asset, giving an insight into market fluctuations.
+        
+        Args:
+        {
+            "symbol": "BTC",
+            "dateStart": "2021-01-04", 
+            "dateEnd": "2021-04-04",
+            "parkinsonRange": 10
+        }
+
+        Returns:
+        {
+            "date": "1617494400000",
+            "parkinsonHV": 48.82
+        }
+        """
+        return self._client.execute(
+            gql(queries.options_rv_parksinson_hist),
+            variable_values={"symbol": symbol, "dateStart": dateStart, "dateEnd": dateEnd, "parkinsonRange": parkinsonRange}
+        )
+
+    def dvol_variance_premium(
+        self,
+        symbol: types.SymbolEnumType
+    ) -> Dict:
+        """
+        This endpoint retrieves data related to the DVOL Variance Premium for a specific symbol.
+
+        The DVOL Variance Premium is an analysis metric used to evaluate the discrepancy between implied volatility and realized volatility in the market.
+
+        Args:
+        {
+            "symbol":  "BTC"
+        }
+
+        Returns:
+        {
+            "dvolImpliedRvDate": "1687478400000",
+            "instrument": "BTC",
+            "dvolOpen30Days": 50.08,
+            "parkinsonHv": 46.05,
+            "variancePremium": 4.03
+        }
+        """
+        return self._client.execute(
+            gql(queries.dvol_variance_premium_query),
+            variable_values={"symbol": symbol}
+        )
+
+    def iv_rv_comparison(
+        self,
+        symbol: types.SymbolEnumType,
+        exchange: types.ExchangeEnumType,
+        dateStart: types.String,
+        dateEnd: types.String
+    ) -> Dict:
+        """
+        Exchange: Deribit Only
+
+        Parameters: BTC/ETH, Date Range, Realized Volatility Calculation Window (days)
+
+        Available date range: April 1, 2019 to present
+
+        This endpoint looks at the hourly realized volatility of cash market (AKA "spot price", AKA "Index Price") compared to the hourly ATM implied volatility.
+
+        These values are congruent in time, some traders like to "shift back" implied volatility, since it's an estimate of future realized volatility, to compared the actual VRP (Variance Risk Premium) realized from the market.
+        
+        Args:
+        {
+            "symbol": "BTC",
+            "exchange": "deribit",
+            "dateStart": "2023-03-01",
+            "dateEnd": "2023-04-01"
+        }
+
+        Returns:
+        {
+            "date": "1685577600000",
+            "parkinsonRvIndex": "30.01",
+            "atm7": 39.84,
+            "atm30": 38.89,
+            "atm60": 39.84,
+            "atm90": 40.97,
+            "atm180": 43.79
+        }
+        """
+        return self._client.execute(
+            gql(queries.iv_rv_comparison_query),
+            variable_values={"symbol": symbol, "exchange": exchange, "dateStart": dateStart, "dateEnd": dateEnd}
+        )
+
+    def zscore_dvol(
+        self,
+        symbol: types.SymbolEnumType,
+        exchange: types.ExchangeEnumType,
+        dateStart: types.String,
+        dateEnd: types.String
+    ) -> Dict:
+        """
+        Exchange: Deribit Only
+        Parameter: Specific option instrument and Date Range.
+        Available date range: May 2021, to present day.
+
+        This endpoint compares the daily implied move from the DVOL index (Deribit's volatility index) versus the close to close log-normal return. This comparison helps to gauge the size (in standard deviations) of the daily price return.
+
+        Dvol represents the "Opening" value at the timestamp time.
+        LN and clse signify the closing return and closing price respectively.
+
+        Args:
+        {
+            "symbol": "BTC",
+            "exchange": "deribit",
+            "dateStart": "2023-03-01",
+            "dateEnd": "2023-04-01"
+        }
+
+        Returns:
+        {
+            "date": "1685491200000",
+            "currency": "BTC",
+            "ln": -1.745,
+            "clse": 27218.24,
+            "zScore": -0.74,
+            "dvol": 44.68
+        }
+        """
+        return self._client.execute(
+            gql(queries.zscore_dvol_query),
+            variable_values={"symbol": symbol, "exchange": exchange, "dateStart": dateStart, "dateEnd": dateEnd}
+        )
+
+    def cash_secured_put_yield(
+        self,
+        symbol: types.SymbolEnumType,
+        exchange: types.ExchangeEnumType
+    ) -> Dict:
+        """
+        This endpoint returns the data related to the "Cash Secured Put" strategy, a low-risk strategy with a similar payout profile to the "Covered Call".
+
+        Traders use this strategy by selling a naked put but maintaining enough cash to purchase the underlying asset at the predetermined strike price. This strategy is relatively low risk because a 100% collateralization ratio is maintained.
+
+        This endpoint will quickly return the annualized yields of various scenarios, assuming the trader maintains enough cash on hand AFTER proceeds from selling the put.
+
+        Why do traders like this endpoint?
+        The "Cash Secured Put" provides a way to generate yield with controlled risk. The detailed information about various scenarios helps in making informed decisions.
+
+        Calculation and Example provided in the docs.
+
+        Args:
+        {
+            "symbol": "BTC",
+            "exchange": "deribit"
+        }
+            
+        Returns:
+        {
+            "date": "1637682194758",
+            "instrumentName": "BTC-24NOV21-57000-P",
+            "expiration": "1637740800000",
+            "strike": 57000,
+            "putCall": "P",
+            "bidUsd": 543.77,
+            "markUsd": 599.13,
+            "askUsd": 629.63,
+            "absoluteBidYieldNet": 0.96,
+            "absoluteMarkYieldNet": 1.06,
+            "absoluteAskYieldNet": 1.11,
+            "bidYieldNetAnnual": 518.69,
+            "markYieldNetAnnual": 572.06,
+            "askYieldNetAnnual": 601.5
+        }
+        """
+        return self._client.execute(
+            gql(queries.cash_secured_put_yield),
+            variable_values={"symbol": symbol, "exchange": exchange}
+        )
+
+    def covered_call_yield(self, symbol: types.SymbolEnumType, exchange: types.ExchangeEnumType) -> Dict:
+        """
+        Exchange: Deribit, Bit.com, Okex, Binance, LedgerX
+
+        The "Covered Call" is constructed by holding a long position in the underlying asset with a 1-to-1 relationship between the long asset and the short call options.
+        This strategy is relatively low risk because a 100% collateralization ratio is maintained.
+
+        This endpoint will quickly return the annualized yields of various scenarios.
+
+        Args:
+        {
+            "symbol": "BTC", 
+            "exchange": "deribit"
+        }
+
+        Returns:
+        {
+            "date": "1691783343970",
+            "instrumentName": "BTC-12AUG23-29500-C",
+            "expiration": "1691827200000",
+            "strike": 29500,
+            "putCall": "C",
+            "bidUsd": 32.29,
+            "markUsd": 44.04,
+            "askUsd": 49.91,
+            "calledOutAnnualized": 335.0953944612627,
+            "calledOutAbsolute": 0.46541027008508706,
+            "absoluteBidYieldNet": 0.11,
+            "absoluteMarkYieldNet": 0.15,
+            "absoluteAskYieldNet": 0.17,
+            "annualBidYieldNet": 79.28,
+            "annualAskYieldNet": 122.6,
+            "annualMarkYieldNet": 108.16,
+            "absoluteMarkYieldCalledOut": 0.61,
+            "absoluteAskYieldCalledOut": 0.63,
+            "absoluteBidYieldCalledOut": 0.57,
+            "annualizedBidYieldCalledOut": 414.75,
+            "annualizedMarkYieldCalledOut": 443.76,
+            "annualizedAskYieldCalledOut": 458.27
+        }
+        """
+        return self._client.execute(
+            gql(queries.covered_call_yield),
+            variable_values={"symbol": symbol, "exchange": exchange}
+        )
+
+    def straddle_yield(self, symbol: types.SymbolEnumType, exchange: types.ExchangeEnumType) -> Dict:
+        """
+        Straddles are a classic volatility trade.
+        Buyers of the straddle hope that the underlying moves enough to either exceed the straddle price by expiration or that the underlying moves enough to profitably “gamma scalp” the underlying. Gamma scalps are the proceeds from delta rebalancing activity that volatility buyers benefit from.
+
+        The opposite is true for straddle sellers; straddle sellers hope that the underlying remains relatively stable and therefore they enjoy theta decay from the short straddle position in excess of gamma scalping outflows.
+
+        This endpoint will quickly return the various metrics of straddles for the relevant exchange.
+
+        Args:
+        {
+            "symbol": "BTC",
+            "exchange": "deribit"
+        }
+
+        Returns:
+        {
+            "expiration": "1691827200000",
+            "strike": 29500,
+            "bidUsd": 152,
+            "markUsd": 196,
+            "askUsd": 249,
+            "bidSpotPercentage": 0.5,
+            "markSpotPercentage": 0.6,
+            "askSpotPercentage": 0.8,
+            "theta": -74.46,
+            "vega": 7.41,
+            "underlyingPrice": 29384
+        }
+        """
+        return self._client.execute(
+            gql(queries.straddle_yield),
+            variable_values={"symbol": symbol, "exchange": exchange}
+        )
+
+    def dvol_vol_of_vol(self, symbol: types.SymbolEnumType, days: types.DaysBackEnumType) -> Dict:
+        """
+        The dVolVolOfVol endpoint provides a volatility index similar to the VIX, specifically constructed by Deribit.com.
+        This 30-day volatility index is supported for both Bitcoin (BTC) and Ethereum (ETH), representing various aspects such as opening, closing, highest, and lowest volatility.
+
+        Args:
+        {
+            "symbol":  "BTC", 
+            "days": "THIRTY"
+        }
+
+        Returns:
+            {
+                "date": "1689984000000",
+                "volOfVol": 60.06,
+                "open": 38.76,
+                "high": 39.31,
+                "low": 37.36,
+                "close": 39.07
+            }
+        """
+        return self._client.execute(
+            gql(queries.dVol_vol_of_vol),
+            variable_values={"symbol": symbol, "days": days}
+        )
+
+
+    def dVol(self, exchange: types.ExchangeEnumType, symbol: types.SymbolEnumType, interval: str, dateStart: str, dateEnd: str) -> Dict:
+        """
+        The dVol endpoint retrieves data for a volatility index that mirrors the functionality of the VIX.
+        Constructed and maintained by Deribit.com, this 30-day index supports both BTC and ETH.
+        It allows users to obtain details like opening, closing, highest, and lowest volatility within a specific date range and interval.
+
+        Args:
+        {
+            "exchange": "deribit", 
+            "symbol":  "BTC", 
+            "interval": "1 minute",
+            "dateStart": "2022-04-11", 
+            "dateEnd": "2022-04-12"
+        }
+
+        Returns:
+        {
+            "timerange": "1649635200000",
+            "instrument": "BTC",
+            "open": 61.08,
+            "high": 61.11,
+            "low": 61.08,
+            "close": 61.11
+        }
+        """
+        return self._client.execute(
+            gql(queries.dVol),
+            variable_values={
+                "exchange": exchange,
+                "symbol": symbol,
+                "interval": interval,
+                "dateStart": dateStart,
+                "dateEnd": dateEnd
+            }
+        )
+
+    def RealizedVolVolatilityCones(self, symbol: types.SymbolEnumType, date1: str, date2: str) -> Dict:
+        """
+        Traders find this endpoint valuable to understand the "realized volatility" or "historical volatility" of underlying crypto-currency.
+        Different measurement-windows such as 7-day, 14-day, 30-day, 90-day, 180-day, and 365-day provide a comprehensive view.
+        This endpoint returns various metrics including minimum, maximum, median, lower 25th percentile, and upper 75th percentile for each window.
+
+        Args:
+        {
+            "symbol": "BTC",
+            "exchange": "deribit",
+            "date1": "2021-01-01",
+            "date2": "2021-02-01"
+        }
+
+        Returns:
+        {
+            "max365": 84.23,
+            "current365": 84.23,
+            "min365": 75.55,
+            "p75365": 82.85249999999999,
+            "p50365": 81.265,
+            "p25365": 77.975,
+            "max180": 77.64,
+            "current180": 77.64,
+            "min180": 59.52,
+            "p75180": 73.9425,
+            "p50180": 70.365,
+            "p25180": 64.2825,
+            "max90": 98.7,
+            "current90": 98.7,
+            "min90": 65.53,
+            "p7590": 93.46000000000001,
+            "p5090": 88.14500000000001,
+            "p2590": 76.87,
+            "max30": 138.23,
+            "current30": 136.08,
+            "min30": 66.77,
+            "p7530": 129.27499999999998,
+            "p5030": 120.535,
+            "p2530": 94.4625,
+            "max14": 157.09,
+            "current14": 122.88,
+            "min14": 72.56,
+            "p7514": 145.515,
+            "p5014": 124.155,
+            "p2514": 114.87,
+            "max7": 168.9,
+            "current7": 122.68,
+            "min7": 74.08,
+            "p757": 145.93,
+            "p507": 124.845,
+            "p257": 120.8725,
+            "max0": 267.5,
+            "current0": 81.28,
+            "min0": 36.07,
+            "p750": 161.475,
+            "p500": 108.825,
+            "p250": 78.8975
+        }
+        """
+        return self._client.execute(
+            gql(queries.RealizedVolVolatilityCones_query),
+            variable_values={
+                "symbol": symbol,
+                "date1": date1,
+                "date2": date2
+            }
+        )
+    
+    def RealizedVolCorr(self, symbol: types.SymbolEnumType, dateStart: str, dateEnd: str) -> Dict:
+        """
+        Traders utilize this endpoint to understand the correlation dynamics between the selected crypto-currency and both Bitcoin (BTC) and Ethereum (ETH).
+        This correlation is evaluated over three distinct timeframes: 10-day, 30-day, and 90-day.
+        The analysis of such correlations provides valuable insights into market trends, relationships, and potential risk management strategies.
+
+        Args:
+        {
+            "symbol": "ETC", 
+            "dateEnd": "2022-06-08", 
+            "dateStart":"2020-01-01"
+        }
+
+        Returns:
+            {
+                "date": "1654646400000",
+                "currency": "ETC",
+                "corr10Btc": 0.9053,
+                "corr30Btc": 0.7408,
+                "corr90Btc": 0.6575,
+                "corr10Eth": 0.9203,
+                "corr30Eth": 0.8409,
+                "corr90Eth": 0.6716
+            }
+        """
+        return self._client.execute(
+            gql(queries.RealizedVolCorr_query),
+            variable_values={
+                "symbol": symbol,
+                "dateStart": dateStart,
+                "dateEnd": dateEnd
+            }
+        )
+
+    def RealizedVolBeta(self, symbol: types.SymbolEnumType, dateStart: str, dateEnd: str) -> Dict:
+        """
+        This endpoint is utilized to analyze the relationship between a selected currency and two prominent cryptocurrencies: Bitcoin and Ethereum.
+        By returning beta values for 10-day, 30-day, and 90-day intervals, it provides insights into how the selected currency's returns are likely 
+        to respond to a change in Bitcoin's or Ethereum's returns. Traders use this information to understand the relative risk and volatility 
+        correlation between the chosen currency and these leading cryptocurrencies.
+
+        Args:
+            {
+                "symbol": "ETC", 
+                "dateEnd": "2022-06-08", 
+                "dateStart":"2020-01-01"
+            }
+
+        Returns:
+            {
+                "date": "1654646400000",
+                "currency": "ETC",
+                "beta10Btc": 0.926,
+                "beta30Btc": 1.2757,
+                "beta90Btc": 1.3631,
+                "beta10Eth": 0.8033,
+                "beta30Eth": 1.0399,
+                "beta90Eth": 1.1484
+            }
+        """
+        return self._client.execute(
+            gql(queries.RealizedVolBeta_query),
+            variable_values={
+                "symbol": symbol,
+                "dateStart": dateStart,
+                "dateEnd": dateEnd
+            }
+        )
+
+    def RealizedVolParkinsonVsC2c(self, symbol: types.SymbolEnumType, dateStart: str, dateEnd: str) -> Dict:
+        """
+        This endpoint enables traders to compare the realized volatility calculated using two different methods:
+        close-to-close (raw) and Parkinson's method. By offering different time windows (from 5 to 180 days),
+        it provides a comprehensive perspective on how these two approaches diverge or align.
+
+        Args:
+        {
+            "symbol": "BTC", 
+            "dateEnd": "2022-06-08", 
+            "dateStart":"2020-01-01"
+        }
+
+        Returns:
+            {
+                "date": "1654646400000",
+                "currency": "BTC",
+                "c2c_5": 41.75,
+                "c2c_7": 44.04,
+                "c2c_10": 72.16,
+                "c2c_14": 62.49,
+                "c2c_30": 66.65,
+                "c2c_60": 68.78,
+                "c2c_90": 62.34,
+                "c2c_180": 65.63,
+                "hv5": 52.14,
+                "hv7": 51.07,
+                "hv14": 59.71,
+                "hv30": 75.3,
+                "hv60": 68.61,
+                "hv90": 61.91,
+                "hv180": 65.14
+            }
+        """
+        return self._client.execute(
+            gql(queries.RealizedVolParkinsonVsC2c_query),
+            variable_values={
+                "symbol": symbol,
+                "dateStart": dateStart,
+                "dateEnd": dateEnd
+            }
+        )
